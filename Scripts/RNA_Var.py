@@ -2,7 +2,7 @@
 
 """
 variant-calling from bulk RNA-Seq pipeline.
-Authors:  Fahimeh Palizban (palizbanfahimeh@gmail.com)
+Authors:  PLEASE LIST THE AUTHORS FROM THE ORIGINAL PAPER
 Description:
 This program implements a workflow pipeline for next generation
 sequencing variant detection using the integration of mapping to both reference genome and transcriptome.
