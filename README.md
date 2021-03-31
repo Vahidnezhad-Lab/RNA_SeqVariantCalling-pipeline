@@ -32,3 +32,9 @@ The binary jar file can be obtained from : http://www.usadellab.org/cms/uploads/
 - $ git clone https://github.com/alexdobin/STAR.git
 - $ cd STAR/source
 - $ make STAR
+###### BWA
+- $ sudo apt install bwa
+###### Picard
+The binary jar file can be obtained from : https://github.com/broadinstitute/picard/releases/download/2.25.1/picard.jar
+###### GATK
+The GATK package can be obtained from : 
