@@ -44,4 +44,17 @@ The GATK package can be obtained from :  https://github.com/broadinstitute/gatk/
 - $ sudo apt install vcftools
 ###### PLINK
 - $ sudo python -m easy_install -f http://math.uic.edu/t3m/plink plink
-###### S
+###### StringTie
+- $ git clone https://github.com/gpertea/stringtie
+- $ cd stringtie
+- $ make release
+
+## Downloading reference files
+- The human hg38 reference transcriptome can be obtained from : ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_30/gencode.v30.transcripts.fa.gz
+- The human hg38 reference genome and other related files can be obtained from : https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0/
+
+## Building references index file
+- $ star --runMode genomeGenerate --runThreadN NumberOfThreads --genomeDir /path/to/genomeDir --genomeFastaFiles /path/to/genome/fasta
+- $ bwa index bwa index gencode.v30.transcripts.fa
+## Sample data-set
+- GM12878 lymphoblastoid cells from the ENCODE project (Gene Expression Omnibus [GEO] accession number GSM758559) were 
