@@ -4,32 +4,32 @@ In the following part all the insilico analysis related to .... is provided.
 
 _It is important to note that in the current project we did not devlope a software package and all the scripts have been implemented to facilitate the automated use of the pipeline._
 
-# Dependencies
+## Dependencies
 Before running the pipeline, there are several tools and packages that need to be obtained and installed:
 
-Python
-FastQC
-Trimmomatic
-STAR
-BWA
-Picard
-GATK
-SAMtools
-VCFtools
-PLINK
-StringTie
+- Python
+- FastQC
+- Trimmomatic
+- STAR
+- BWA
+- Picard
+- GATK
+- SAMtools
+- VCFtools
+- PLINK
+- StringTie
 
 
 
-# Installation
+## Installation
 All the instructions are based on running the pipeline on Ubuntu.
 
-**FastQC**
+###### FastQC
 $ sudo apt install fastqc
-**Trimmomatic**
+###### Trimmomatic
 The binary jar file can be obtained from : http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
-**STAR**
+###### STAR
 $ git clone https://github.com/alexdobin/STAR.git
-# Compile
+Compile
 cd STAR/source
 make STAR
