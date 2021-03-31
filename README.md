@@ -29,6 +29,6 @@ $ sudo apt install fastqc
 ###### Trimmomatic
 The binary jar file can be obtained from : http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip
 ###### STAR
-$ git clone https://github.com/alexdobin/STAR.git
-$ cd STAR/source
-$ make STAR
+- $ git clone https://github.com/alexdobin/STAR.git
+- $ cd STAR/source
+- $ make STAR
