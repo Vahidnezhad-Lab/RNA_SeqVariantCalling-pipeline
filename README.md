@@ -1,4 +1,4 @@
-# RNA_Seq VariantCalling-pipeline
+# RNA-seq VariantCalling-pipeline
 A novel pipeline that increases the yield of variant calling from RNA-Seq by concurrent use of genome and transcriptome references in parallel. By using the integrated workflow, variant calling and extracting differentially expressed genes will be identified at the same time.
 In the following part all the insilico analysis related to .... is provided.
 
