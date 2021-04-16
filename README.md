@@ -57,4 +57,4 @@ The GATK package can be obtained from :  https://github.com/broadinstitute/gatk/
 - $ star --runMode genomeGenerate --runThreadN NumberOfThreads --genomeDir /path/to/genomeDir --genomeFastaFiles /path/to/genome/fasta
 - $ bwa index bwa index gencode.v30.transcripts.fa
 ## Sample data-set
-- GM12878 lymphoblastoid cells from the ENCODE project (Gene Expression Omnibus [GEO] accession number GSM758559) were 
+- GM12878 lymphoblastoid cells from the ENCODE project (Gene Expression Omnibus [GEO] accession number GSM758559) were used for validating this pipeline.
