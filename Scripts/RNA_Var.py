@@ -2,10 +2,9 @@
 
 """
 variant-calling from bulk RNA-Seq pipeline.
-Authors:  PLEASE LIST THE AUTHORS FROM THE ORIGINAL PAPER
+Authors:  Fahimeh Palizban (palizbanfahimeh@gmail.com)
 Description:
-This program implements a workflow pipeline for next generation
-sequencing variant detection using the integration of mapping to both reference genome and transcriptome.
+This program implements a workflow pipeline for next generation sequencing variant detection using the integration of mapping to both reference genome and transcriptome.
 It supports parallel evaluation of independent pipeline stages,
 and can run stages on a cluster environment.
 
@@ -26,12 +25,12 @@ RNA_var is free for non-commercial use without warranty.
 """
 
 usage = """Usage: %prog[-h] -1 Read1.fastq -2 Read2.fastq -o outputDir -index_dir reference_genome -transcriptome
-                  reference_transcriptome [-t # threads, default: 4] [-g Using gzip input files, default: False] [-c Minimum coverage, default: 12] -picard picard.jar -gatk gatk.jar"""
+                  reference_transcriptome [-t # threads, default: 4] [-g Using gzip input files, default: False]  -picard picard.jar -gatk gatk.jar"""
 
 
 def main(): 
-    print("Staaaaart")
-    parser = argparse.ArgumentParser(description='RNA_var: An All-In-One Workflow for variant Detection, Quantification, and Visualization')
+
+    parser = argparse.ArgumentParser(description='RNA_var:  Workflow for variant Detection, Quantification, and Visualization')
 
     parser.add_argument('-t', '--n_thread', required=False, default='4',
                         type=str, help='Number of threads')
@@ -57,16 +56,10 @@ def main():
     parser.add_argument('-transcriptome', '--transcriptome', required=True, metavar=' reference_transcriptome', type=str,
                         help='Path to directory containing index files and fasta for reference transcriptome')
 
-    parser.add_argument('-c', '--min_coverage', required=False, metavar='min_coverage', default='12', type=str,
-                        help='Minimum read coverage')
-
     parser.add_argument('-g', '--gzip', required=False,
                         metavar='True/False', default='False', type=str,
                         help="""Toggle "-g True" for using gunzipped FASTQ input""")
 
-    parser.add_argument('-s', '--consensus', required=False,
-                        metavar='True/False', default='False', type=str,
-                        help="""Toggle "-s True" to generate consensus fasta file""")
 
     args = parser.parse_args()
 
@@ -105,10 +98,8 @@ def main():
     out = os.path.abspath(args.out)
     n_thread = args.n_thread
     gzip = args.gzip
-    min_coverage = args.min_coverage
-    consensus = args.consensus
 
-    ##os.system('ulimit -n 2048')
+    os.system('ulimit -n 2048')
 
     print("Aligning to human reference genome using STAR")
 
@@ -122,106 +113,117 @@ def main():
             print("Error: Invalid input for -g/--gzip. Input should be 'True' if using gunzipped files")
             sys.exit()
         print('Running ', cmd1)
-        ##os.system(cmd1)
+        os.system(cmd1)
 
     alignment()
 
     print("Aligning to reference transcriptome using BWA")
 
     def transcriptome_alignment():
-        cmd2 = 'bwa mem ' + fq1 + ' ' + fq2 + ' ' + transcriptome + '/*.fasta' + ' -t ' + n_thread + ' > ' + out +'trans.sam'
+        cmd2 = 'bwa mem ' + fq1 + ' ' + fq2 + ' ' + transcriptome + '/*.fasta' + ' -t ' + n_thread + ' > ' + out +'_trans.sam'
         print('Running ', cmd2)
-        ##os.system(cmd2)
+        os.system(cmd2)
 
     transcriptome_alignment()
 
     print("Converting SAM to BAM")
 
     def sam_to_bam():
-        cmd3 = 'samtools view -Sb -h ' + out + '/trans.sam > ' + out + '_trans.bam'
+        cmd3 = 'samtools view -Sb -h ' + out + '/_trans.sam > ' + out + '_trans.bam'
         print('Running ', cmd3)
-        ##os.system(cmd3)
+        os.system(cmd3)
 
     sam_to_bam()
 
     print("Sorting BAM")
 
     def sort():
-        cmd4 = 'samtools sort -@ ' + n_thread + ' ' + out + '/trans.bam -o ' + out + '_trans_Coord_sorted.bam'
+        cmd4 = 'samtools sort -@ ' + n_thread + ' ' + out + '/_trans.bam -o ' + out + '_trans_Coord_sorted.bam'
         print('Running ', cmd4)
-        ##os.system(cmd4)
+        os.system(cmd4)
 
         #cmd5 = 'samtools sort -n -@ ' + n_thread + ' ' + out + '/unmapped_aln.bam -o' + out + '/unmapped_aln_sorted.bam'
         #print('Running ', cmd5)
-        ###os.system(cmd5)
+        #os.system(cmd5)
 
     sort()
 
     def addreadgroup():
         cmd5 = 'java -jar' + picard +  ' AddOrReplaceReadGroups ' + 'I=' + out + '/accepted_hits.bam ' + 'O=' + out + '_RG.bam' + ' RGID=4 RGLB=twist RGPL=illumina RGPU=unit1 RGSM=' + out
         print('Running ', cmd5)
-        ##os.system(cmd5)        
-        cmd6 = 'java -jar' + picard +  ' AddOrReplaceReadGroups ' + 'I='+ out + 'trans_Coord_sorted.bam' + 'O=' + out + '_Trans_RG.bam' + 'RGID=4 RGLB=twist RGPL=illumina RGPU=unit1 RGSM=' + out
+        os.system(cmd5)        
+        cmd6 = 'java -jar' + picard +  ' AddOrReplaceReadGroups ' + 'I='+ out + '_trans_Coord_sorted.bam' + 'O=' + out + '_Trans_RG.bam' + 'RGID=4 RGLB=twist RGPL=illumina RGPU=unit1 RGSM=' + out
         print('Running ', cmd6)
-	##os.system(cmd6)
+        os.system(cmd6)
 
 
     addreadgroup()
 
     def markduplicate():
-        cmd7 = 'java -jar' + picard + ' ' + 'MarkDuplicates ' +  'I=' + out + '_RG.bam' +   'O=' + out + 'MarkDup_RG.Bam' + 'M=' + out + 'marked_dup_metrics.tx'
-        cmd8 = 'java -jar' + picard + ' ' + 'MarkDuplicates ' +  'I=' + out + '_Trans_RG.bam' +   'O='  + out + 'MarkDup_Trans_RG.bam '+ 'M=' + out +  'trans_marked_dup_metrics.tx'
-
-    print("Indexing BAM")
-
-    def index():
-        cmd6 = 'samtools index ' + out + '/unmapped_aln_Coord_sorted.bam'
-        print('Running ', cmd6)
-        ##os.system(cmd6)
-
-    index()
-
-    print("Processing Viral Counts using StringTie")
-
-    def stringtie():
-        cmd7 = 'stringtie -A -l ' + out + '/accepted_hits.bam -G ' + index_dir+ '/*.gtf -o ' + out + '/stringtie/stringtie.gtf -p ' + n_thread
+        cmd7 = 'java -jar' + picard + ' ' + 'MarkDuplicates ' +  'I=' + out + '_RG.bam' +   'O=' + out + '_MarkDup_RG.Bam' + 'M=' + out + 'marked_dup_metrics.tx'
         print('Running ', cmd7)
-        ##os.system(cmd7)
-
-    stringtie()
-
-    def Indexmarkedbam():
-        cmd8 = 'java -jar' + picard + ' ' + 'BuildBamIndex' + 'I=' + out + 'MarkDup_RG.Bam' 
+        os.system(cmd7) 
+        cmd8 = 'java -jar' + picard + ' ' + 'MarkDuplicates ' +  'I=' + out + '_Trans_RG.bam' +   'O='  + out + '_MarkDup_Trans_RG.bam '+ 'M=' + out +  'trans_marked_dup_metrics.tx'
         print('Running ', cmd8)
-        ##os.system(cmd8)
-        cmd9 = 'java -jar' + picard + ' ' + 'BuildBamIndex' + 'I=' + out + 'MarkDup_Trans_RG.bam '
-        print('Running ', cmd9)
-        ##os.system(cmd9)
+        os.system(cmd8)
+   
+    markduplicate()
 
-    Indexmarkedbam()
+   
    
     def splitNcigar():
-       cmd10 = 'java -jar' + gatk + '' + 'SplitNCigarReads -R ' + index_dir+ '/*.fasta -I ' + out + 'MarkDup_RG.Bam -O ' + out + '_splitNcigar.Bam '
+       cmd9 = 'java -jar' + gatk + '' + 'SplitNCigarReads -R ' + index_dir+ '/*.fasta -I ' + out + ' _MarkDup_RG.Bam -O ' + out + '_splitNcigar.Bam '
 
+       print('Running ', cmd9)
+       os.system(cmd9)
+   
+    splitNcigar()
+
+    def Indexncigarbam():
+        cmd10 = 'java -jar' + picard + ' ' + 'BuildBamIndex' + 'I=' + out + '_splitNcigar.Bam' 
+        print('Running ', cmd10)
+        os.system(cmd10)
+        cmd11 = 'java -jar' + picard + ' ' + 'BuildBamIndex' + 'I=' + out + '_MarkDup_Trans_RG.bam '
+        print('Running ', cmd11)
+        os.system(cmd11)
+
+    Indexmarked.ncigarbam()
 
     def variantCalling():
-        cmd10  = 'samtools mpileup -f ' + transcriptome + '/*.fasta  -g ' + out + 'MarkDup_Trans_RG.bam ' + '|bcftools call -m > ' +out + '_trans.vcf' 
-         print('Running ', cmd11)
-        ##os.system(cmd11)   
-        cmd12 = 'java -jar ' + gatk + ' HaplotypeCaller -R ' + index_dir + '/*.fasta -I ' + out + '_splitNcigar.Bam -O ' + '_gen.vcf
+        cmd12  = 'samtools mpileup -f ' + transcriptome + '/*.fasta  -g ' + out + '_MarkDup_Trans_RG.bam ' + '|bcftools call -m > ' +out + '_trans.vcf' 
         print('Running ', cmd12)
-        ##os.system(cmd12) 
-    
-    def vcfmerg():
-        cmd13 = 'bcftools merg ' + out + '/*.vcf -Oz -o ' + out + '_Merged.vcf' 
+        os.system(cmd12)   
+        cmd13 = 'java -jar ' + gatk + ' HaplotypeCaller -R ' + index_dir + '/*.fasta -I ' + out + '_splitNcigar.Bam -O ' + '_gen.vcf '
         print('Running ', cmd13)
-        ##os.system(cmd13) 
+        os.system(cmd13) 
 
-   def ROH():
-       cmd14 = 'vcftools --vcf ' + '' + out + '_Merged.vcf --plink --out' + out + 'plink'
-       print('Running ', cmd14)
-        ##os.system(cmd14) 
-       cmd15 = 'plink --file ' + out + 'plink'+ ' –homozyg '
 
+    variantCalling()
+
+
+    def vcfmerg():
+        cmd14 = 'bcftools merg ' + out + '/*.vcf -Oz -o ' + out + '_Merged.vcf' 
+        print('Running ', cmd14)
+        os.system(cmd14)
+    vcfmerg() 
+
+    def ROH():
+       cmd15 = 'vcftools --vcf ' + '' + out + '_Merged.vcf --plink --out' + out + 'plink'
+       print('Running ', cmd15)
+       os.system(cmd15) 
+       cmd16 = 'plink --file ' + out + 'plink'+ ' –homozyg '
+       print('Running ', cmd16)
+       os.system(cmd16)  
+    ROH()
+
+
+    print("gene expression analysis using StringTie")
+
+    def stringtie():
+        cmd17 = 'stringtie -A -l ' + out + '/accepted_hits.bam -G ' + index_dir+ '/*.gtf -o ' + out + '/stringtie/stringtie.gtf -p ' + n_thread
+        print('Running ', cmd17)
+        os.system(cmd17)
+
+    stringtie()
 #if __name__ == '__main__':
 main()
